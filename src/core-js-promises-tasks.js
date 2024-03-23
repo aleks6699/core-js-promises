@@ -66,15 +66,9 @@ function getPromiseResult(source) {
  */
 function getFirstResolvedPromiseResult(promises) {
   return new Promise((resolve, reject) => {
-    Promise.race(
-      promises.map((promise) => promise.catch(() => undefined))
-    ).then((result) => {
-      if (result !== undefined) {
-        resolve(result);
-      } else {
-        reject(new Error('All promises were rejected'));
-      }
-    });
+    promises.forEach((item) =>
+      item.then((value) => resolve(value)).catch(() => (value) => reject(value))
+    );
   });
 }
 
@@ -115,7 +109,11 @@ function getFirstPromiseResult(promises) {
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)] => Promise rejected with 2
  */
 function getAllOrNothing(promises) {
-  return Promise.all(promises);
+  return new Promise((resolve, reject) => {
+    Promise.all(promises)
+      .then((results) => resolve(results))
+      .catch((reason) => reject(reason));
+  });
 }
 
 /**
